@@ -1,0 +1,82 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
+	"vcs": {
+		"enabled": false,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+
+	"files": {
+		"ignoreUnknown": false,
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/build",
+			"!**/dist",
+			"!**/playwright-report"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"style": {
+				"useImportType": {
+					"fix": "safe",
+					"level": "on",
+					"options": {
+						"style": "separatedType"
+					}
+				},
+				"noNonNullAssertion": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "warn",
+				"noUnknownAtRules": "off"
+			},
+			"complexity": {
+				"noBannedTypes": "warn",
+				"useLiteralKeys": "warn"
+			},
+			"a11y": {
+				"noSvgWithoutTitle": "warn",
+				"noLabelWithoutControl": "warn"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"cssModules": false,
+			"tailwindDirectives": true
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							[":BUN:", ":NODE:"],
+							":BLANK_LINE:",
+							[":PACKAGE:"],
+							":BLANK_LINE:",
+							["@cw/*", "~/*"]
+						]
+					}
+				},
+				"useSortedAttributes": "on"
+			}
+		}
+	}
+}
