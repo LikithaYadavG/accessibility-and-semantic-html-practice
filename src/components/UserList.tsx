@@ -10,9 +10,9 @@ interface UserListProps {
 export function UserList({ users, onDeleteUser }: UserListProps) {
 	if (users.length === 0) {
 		return (
-			<section aria-live="polite" className="text-gray-500 text-center py-8">
-				<p>No users found. Add a user to get started.</p>
-			</section>
+			<p aria-live="polite" className="text-gray-500 text-center py-8">
+				No users found. Add a user to get started.
+			</p>
 		);
 	}
 

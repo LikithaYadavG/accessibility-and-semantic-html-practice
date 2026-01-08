@@ -2,19 +2,18 @@
  * Validates that a string is not empty and contains non-whitespace characters
  */
 export const isValidName = (name: string): boolean => {
-	return typeof name === "string" && name.trim().length > 0;
+	return name.trim().length > 0;
 };
 
 /**
  * Validates that an email string matches a basic email format
  */
 export const isValidEmail = (email: string): boolean => {
-	if (typeof email !== "string" || email.trim().length === 0) {
-		return false;
-	}
+	const trimmedEmail = email.trim();
+	if (trimmedEmail.length === 0) return false;
 
 	const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-	return emailPattern.test(email.trim());
+	return emailPattern.test(trimmedEmail);
 };
 
 /**

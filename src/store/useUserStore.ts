@@ -2,22 +2,20 @@ import { create } from "zustand";
 import type { User } from "../types/user";
 import { generateId } from "../utils/uuid";
 import { validateUserInput } from "../utils/validation";
+import { useModalStore } from "./useModalStore";
 
 interface UserStore {
 	users: User[];
-	modalOpen: boolean;
-	modalMessage: string;
 	addUser: (name: string, email: string) => void;
 	deleteUser: (id: string) => void;
-	setModalOpen: (open: boolean) => void;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
 	users: [],
-	modalOpen: false,
-	modalMessage: "",
 
-	addUser: (name, email) => {
+	addUser: (name: string, email: string): void => {
+		const { openModal } = useModalStore.getState();
+
 		try {
 			const validated = validateUserInput(name, email);
 
@@ -29,29 +27,29 @@ export const useUserStore = create<UserStore>((set) => ({
 
 			set((state) => ({
 				users: [...state.users, newUser],
-				modalMessage: "User added successfully!",
-				modalOpen: true,
 			}));
+
+			openModal("User added successfully!");
 		} catch (error) {
-			set({
-				modalMessage:
-					error instanceof Error ? error.message : "Failed to add user",
-				modalOpen: true,
-			});
+			openModal(error instanceof Error ? error.message : "Failed to add user");
 		}
 	},
 
-	deleteUser: (id) => {
+	deleteUser: (id: string): void => {
+		const { openModal } = useModalStore.getState();
+
+		const currentUsers = useUserStore.getState().users;
+		const userExists = currentUsers.some((user) => user.id === id);
+
+		if (!userExists) {
+			openModal("User not found");
+			return;
+		}
+
 		set((state) => ({
 			users: state.users.filter((user) => user.id !== id),
-			modalMessage: "User deleted successfully!",
-			modalOpen: true,
 		}));
-	},
 
-	setModalOpen: (open) =>
-		set((state) => ({
-			modalOpen: open,
-			modalMessage: open ? state.modalMessage : "",
-		})),
+		openModal("User deleted successfully!");
+	},
 }));

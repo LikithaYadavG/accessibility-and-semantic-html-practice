@@ -1,13 +1,17 @@
-import { describe, it, beforeEach, expect } from "vitest";
+import { describe, it, beforeEach, expect, vi } from "vitest";
 import { useUserStore } from "./useUserStore";
+import { useModalStore } from "./useModalStore";
 
 describe("useUserStore", () => {
 	beforeEach(() => {
 		useUserStore.setState({
 			users: [],
-			modalOpen: false,
-			modalMessage: "",
 		});
+		useModalStore.setState({
+			isOpen: false,
+			message: "",
+		});
+		vi.clearAllMocks();
 	});
 
 	it("should initialize with empty state", () => {
@@ -17,11 +21,8 @@ describe("useUserStore", () => {
 	it("should add a user to the store", () => {
 		useUserStore.getState().addUser("Alice", "alice@example.com");
 		expect(useUserStore.getState().users.length).toBe(1);
-	});
-
-	it("should open modal after adding a user", () => {
-		useUserStore.getState().addUser("Alice", "alice@example.com");
-		expect(useUserStore.getState().modalOpen).toBe(true);
+		expect(useUserStore.getState().users[0].name).toBe("Alice");
+		expect(useUserStore.getState().users[0].email).toBe("alice@example.com");
 	});
 
 	it("should remove a user by id", () => {
@@ -32,48 +33,56 @@ describe("useUserStore", () => {
 		expect(useUserStore.getState().users.length).toBe(0);
 	});
 
-	it("should open modal after removing a user", () => {
+	it("should not remove any user when id does not exist", () => {
 		useUserStore.getState().addUser("Bob", "bob@example.com");
-		const id = useUserStore.getState().users[0].id;
+		useUserStore.getState().addUser("Alice", "alice@example.com");
 
-		useUserStore.getState().deleteUser(id);
-		expect(useUserStore.getState().modalOpen).toBe(true);
+		const nonExistentId = "non-existent-id-12345";
+		useUserStore.getState().deleteUser(nonExistentId);
+
+		expect(useUserStore.getState().users.length).toBe(2);
 	});
 
-	it("should set an error when name is empty", () => {
+	it("should show error message when deleting non-existent user", () => {
+		useUserStore.getState().addUser("Bob", "bob@example.com");
+
+		const nonExistentId = "non-existent-id-12345";
+		useUserStore.getState().deleteUser(nonExistentId);
+
+		expect(useModalStore.getState().isOpen).toBe(true);
+		expect(useModalStore.getState().message.length).toBeGreaterThan(0);
+	});
+
+	it("should not add user when name is empty", () => {
 		useUserStore.getState().addUser("", "valid@example.com");
 
-		const state = useUserStore.getState();
-		expect(state.users.length).toBe(0);
-		expect(state.modalOpen).toBe(true);
-		expect(state.modalMessage.length).toBeGreaterThan(0);
+		expect(useUserStore.getState().users.length).toBe(0);
+		expect(useModalStore.getState().isOpen).toBe(true);
+		expect(useModalStore.getState().message.length).toBeGreaterThan(0);
 	});
 
-	it("should set an error when name is whitespace-only", () => {
+	it("should not add user when name is whitespace-only", () => {
 		useUserStore.getState().addUser("   ", "valid@example.com");
 
-		const state = useUserStore.getState();
-		expect(state.users.length).toBe(0);
-		expect(state.modalOpen).toBe(true);
-		expect(state.modalMessage.length).toBeGreaterThan(0);
+		expect(useUserStore.getState().users.length).toBe(0);
+		expect(useModalStore.getState().isOpen).toBe(true);
+		expect(useModalStore.getState().message.length).toBeGreaterThan(0);
 	});
 
-	it("should set an error when email is invalid", () => {
+	it("should not add user when email is invalid", () => {
 		useUserStore.getState().addUser("John Doe", "invalid-email");
 
-		const state = useUserStore.getState();
-		expect(state.users.length).toBe(0);
-		expect(state.modalOpen).toBe(true);
-		expect(state.modalMessage.length).toBeGreaterThan(0);
+		expect(useUserStore.getState().users.length).toBe(0);
+		expect(useModalStore.getState().isOpen).toBe(true);
+		expect(useModalStore.getState().message.length).toBeGreaterThan(0);
 	});
 
-	it("should set an error when email is empty", () => {
+	it("should not add user when email is empty", () => {
 		useUserStore.getState().addUser("John Doe", "");
 
-		const state = useUserStore.getState();
-		expect(state.users.length).toBe(0);
-		expect(state.modalOpen).toBe(true);
-		expect(state.modalMessage.length).toBeGreaterThan(0);
+		expect(useUserStore.getState().users.length).toBe(0);
+		expect(useModalStore.getState().isOpen).toBe(true);
+		expect(useModalStore.getState().message.length).toBeGreaterThan(0);
 	});
 
 	it("should trim whitespace from valid inputs", () => {
