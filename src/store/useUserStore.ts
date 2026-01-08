@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import type { User } from "../types/user";
+import { generateId } from "../utils/uuid";
+import { validateUserInput } from "../utils/validation";
 
 interface UserStore {
 	users: User[];
@@ -16,17 +18,27 @@ export const useUserStore = create<UserStore>((set) => ({
 	modalMessage: "",
 
 	addUser: (name, email) => {
-		const newUser: User = {
-			id: crypto.randomUUID(),
-			name,
-			email,
-		};
+		try {
+			const validated = validateUserInput(name, email);
 
-		set((state) => ({
-			users: [...state.users, newUser],
-			modalMessage: "User added successfully!",
-			modalOpen: true,
-		}));
+			const newUser: User = {
+				id: generateId(),
+				name: validated.name,
+				email: validated.email,
+			};
+
+			set((state) => ({
+				users: [...state.users, newUser],
+				modalMessage: "User added successfully!",
+				modalOpen: true,
+			}));
+		} catch (error) {
+			set({
+				modalMessage:
+					error instanceof Error ? error.message : "Failed to add user",
+				modalOpen: true,
+			});
+		}
 	},
 
 	deleteUser: (id) => {
@@ -37,7 +49,9 @@ export const useUserStore = create<UserStore>((set) => ({
 		}));
 	},
 
-	setModalOpen: (open) => {
-		set({ modalOpen: open });
-	},
+	setModalOpen: (open) =>
+		set((state) => ({
+			modalOpen: open,
+			modalMessage: open ? state.modalMessage : "",
+		})),
 }));

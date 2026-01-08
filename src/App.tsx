@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import { Modal } from "./components/Modal";
 import { UserForm } from "./components/UserForm";
 import { UserList } from "./components/UserList";
@@ -5,7 +6,16 @@ import { useUserStore } from "./store/useUserStore";
 
 function App() {
 	const { users, modalOpen, modalMessage, addUser, deleteUser, setModalOpen } =
-		useUserStore();
+		useUserStore(
+			useShallow((state) => ({
+				users: state.users,
+				modalOpen: state.modalOpen,
+				modalMessage: state.modalMessage,
+				addUser: state.addUser,
+				deleteUser: state.deleteUser,
+				setModalOpen: state.setModalOpen,
+			})),
+		);
 
 	return (
 		<div className="min-h-screen bg-gray-50 py-8 px-4">
